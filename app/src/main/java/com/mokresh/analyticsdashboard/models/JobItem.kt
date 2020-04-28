@@ -11,5 +11,5 @@ data class JobItem(
     @SerializedName("title")
     val jobItemTitle: String,
     @SerializedName("total")
-    val jobItemTotal: Int
+    val jobItemTotal: Int?
 )

@@ -20,6 +20,8 @@ class AnalyticsViewModel(
 
     private lateinit var subscription: Disposable
 
+
+    //to get the data from the analytics API
     fun getAnalytics(scope: String) {
         subscription = service.analytics(scope)
             .observeOn(AndroidSchedulers.mainThread())
@@ -31,19 +33,21 @@ class AnalyticsViewModel(
     }
 
 
+    // start the loading indicator when the API call start
     private fun onRetrieveAnalyticsStart() {
         loadingVisibility.value = View.VISIBLE
         errorMessage.value = null
     }
 
 
+    // put the response in mutableLive data to observe it and display it
     private fun onRetrieveAnalyticsSuccess(analytics: Analytics) {
         loadingVisibility.value = View.GONE
-
         analyticsResponseBody.value = analytics
 
     }
 
+    // show error message when something wrong happen
     private fun onRetrieveAnalyticsError() {
         errorMessage.value = R.string.load_error
     }
