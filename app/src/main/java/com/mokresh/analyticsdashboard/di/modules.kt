@@ -1,33 +1,17 @@
 package com.mokresh.analyticsdashboard.di
 
 import com.mokresh.analyticsdashboard.app.ApiServices
+import com.mokresh.analyticsdashboard.ui.AnalyticsViewModel
 import com.mokresh.analyticsdashboard.utils.BaseSchedulers
 import com.mokresh.analyticsdashboard.utils.Constants
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-val cacheModule by lazy {
-
-    module {
-        single {
-
-        }
-    }
-}
-
-
-val repositoryModule by lazy {
-    module {
-
-        single {
-
-        }
-    }
-}
 
 val appModule by lazy {
     module {
@@ -38,7 +22,9 @@ val appModule by lazy {
 
 val viewModelModule by lazy {
     module {
-
+        viewModel {
+            AnalyticsViewModel(get())
+        }
     }
 }
 
