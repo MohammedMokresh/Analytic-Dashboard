@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Analytics Dashboard</string>
-
+    <string name="load_error">An error occurred while loading the Milestones</string>
 </resources>
