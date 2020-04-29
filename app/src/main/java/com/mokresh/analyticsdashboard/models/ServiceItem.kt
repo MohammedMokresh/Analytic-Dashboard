@@ -11,5 +11,5 @@ data class ServiceItem(
     @SerializedName("title")
     val serviceItemTitle: String,
     @SerializedName("total")
-    val serviceItemTotal: Int
+    val serviceItemTotal: Int?
 )

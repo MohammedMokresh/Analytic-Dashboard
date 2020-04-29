@@ -135,6 +135,33 @@
                     </androidx.cardview.widget.CardView>
 
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/rating_title_TextView"
+                            style="@style/text_bold_16_black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/rating_description_TextView"
+                            style="@style/text_regular_16_grey"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <com.github.mikephil.charting.charts.BarChart
+                            android:id="@+id/rating_chart"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/_300sdp"
+                            android:background="@android:color/white"
+                             />
+
+                    </LinearLayout>
+
+
                 </LinearLayout>
 
             </androidx.core.widget.NestedScrollView>
