@@ -10,25 +10,23 @@ import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis.AxisDependency
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.utils.EntryXComparator
-import com.github.mikephil.charting.utils.MPPointF
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mokresh.analyticsdashboard.databinding.ActivityMainBinding
 import com.mokresh.analyticsdashboard.databinding.JobItemBinding
 import com.mokresh.analyticsdashboard.databinding.PieChartItemBinding
 import com.mokresh.analyticsdashboard.models.Analytics
-import com.mokresh.analyticsdashboard.models.PieChartItem
 import com.mokresh.analyticsdashboard.ui.AnalyticsViewModel
 import com.mokresh.analyticsdashboard.utils.SCOPES
+import com.mokresh.analyticsdashboard.utils.Utils.setPieChartData
+import com.mokresh.analyticsdashboard.utils.Utils.showError
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
@@ -42,20 +40,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.viewModel = analyticsViewModel
 
-
+        // call the api with different scope when the the bottom navigation item clicked
         val navigationItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener =
             object : BottomNavigationView.OnNavigationItemSelectedListener {
                 override fun onNavigationItemSelected(@NonNull item: MenuItem): Boolean {
                     when (item.itemId) {
                         R.id.navigation_all -> {
                             analyticsViewModel.getAnalytics(SCOPES.ALL.scope)
-
                             return true
                         }
                         R.id.navigation_today -> {
                             analyticsViewModel.getAnalytics(SCOPES.TODAY.scope)
-
                             return true
                         }
 
@@ -85,92 +82,20 @@ class MainActivity : AppCompatActivity() {
             showServices(it)
             rating(it)
         })
+        analyticsViewModel.errorMessage.observe(this, Observer { errorMessage ->
+            if (errorMessage != null) showError(errorMessage, binding.root)
+        })
 
-
-    }
-
-
-    private fun showPieCharts(analytics: Analytics) {
-        val viewGroup =
-            (findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
-
-        binding.pieChartsLineaLayout.removeAllViews()
-        if (analytics.pieCharts != null) {
-            binding.pieChartCardView.visibility=View.VISIBLE
-
-            for (items in analytics.pieCharts) {
-                val bin = DataBindingUtil.inflate<PieChartItemBinding>(
-                    layoutInflater,
-                    R.layout.pie_chart_item,
-                    viewGroup,
-                    false
-                )
-                bin.pieChartTitleTextView.text = items.pieChartTitle
-                bin.pieChartDescriptionTextView.text = items.pieChartDescription
-
-                setPieChartData(items.pieChartItemsList, bin.pieChart)
-
-                val checkParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                binding.pieChartsLineaLayout.addView(bin.root, checkParams)
-
-
-            }
-
-        }else{
-            binding.pieChartCardView.visibility=View.GONE
-        }
-
-    }
-
-
-    private fun setPieChartData(lineChartItemsList: List<PieChartItem>, chart: PieChart) {
-        val entries = ArrayList<PieEntry>()
-        for (item in lineChartItemsList) {
-            entries.add(
-                PieEntry(item.pieChartItemValue.toFloat(), item.pieChartItemKey)
-            )
-        }
-
-        val dataSet = PieDataSet(entries, "")
-        dataSet.setDrawIcons(false)
-        dataSet.sliceSpace = 3f
-        dataSet.iconsOffset = MPPointF(0F, 40F)
-        dataSet.selectionShift = 5f
-
-        // add a lot of colors
-        val colors = ArrayList<Int>()
-        for (c in ColorTemplate.VORDIPLOM_COLORS) colors.add(c)
-        for (c in ColorTemplate.JOYFUL_COLORS) colors.add(c)
-        for (c in ColorTemplate.COLORFUL_COLORS) colors.add(c)
-        for (c in ColorTemplate.LIBERTY_COLORS) colors.add(c)
-        for (c in ColorTemplate.PASTEL_COLORS) colors.add(c)
-        colors.add(ColorTemplate.getHoloBlue())
-        dataSet.colors = colors
-        //dataSet.setSelectionShift(0f);
-        val data = PieData(dataSet)
-        data.setValueFormatter(PercentFormatter(chart))
-        data.setValueTextSize(11f)
-        data.setValueTextColor(Color.WHITE)
-        chart.data = data
-
-        // undo all highlights
-        chart.highlightValues(null)
-        chart.invalidate()
     }
 
 
     private fun lineChart(analytics: Analytics) {
         if (analytics.lineCharts != null) {
-            binding.lineChartCardView.visibility=View.VISIBLE
+            binding.lineChartCardView.visibility = View.VISIBLE
 
             val xVal: ArrayList<String> = ArrayList<String>()
             val yValJobs = ArrayList<Entry>()
             val yValServices = ArrayList<Entry>()
-
-
 
             binding.lineChartTitleTextView.text = analytics.lineCharts[0][0].lineChartTitle
             binding.lineChartDescriptionTextView.text =
@@ -180,8 +105,8 @@ class MainActivity : AppCompatActivity() {
                 for ((i, v) in value.lineChartItemsList.withIndex()) {
 
                     xVal.add(v.lineChartItemKey)
-                    yValJobs.add(Entry(v.lineChartItemValue[0].value.toFloat(), i.toFloat()))
-                    yValServices.add(Entry(v.lineChartItemValue[1].value.toFloat(), i.toFloat()))
+                    yValJobs.add(Entry(i.toFloat(), v.lineChartItemValue[0].value.toFloat()))
+                    yValServices.add(Entry(i.toFloat(), v.lineChartItemValue[1].value.toFloat()))
 
                 }
             }
@@ -206,12 +131,7 @@ class MainActivity : AppCompatActivity() {
                 set1.axisDependency = AxisDependency.LEFT
                 set1.color = ColorTemplate.getHoloBlue()
                 set1.setCircleColor(Color.WHITE)
-                set1.lineWidth = 2f
-                set1.circleRadius = 3f
-                set1.fillAlpha = 65
                 set1.fillColor = ColorTemplate.getHoloBlue()
-                set1.highLightColor = Color.rgb(244, 117, 117)
-                set1.setDrawCircleHole(false)
 
 
                 // create a dataset and give it a type
@@ -219,12 +139,7 @@ class MainActivity : AppCompatActivity() {
                 set2.axisDependency = AxisDependency.RIGHT
                 set2.color = Color.RED
                 set2.setCircleColor(Color.WHITE)
-                set2.lineWidth = 2f
-                set2.circleRadius = 3f
-                set2.fillAlpha = 65
                 set2.fillColor = Color.RED
-                set2.setDrawCircleHole(false)
-                set2.highLightColor = Color.rgb(244, 117, 117)
 
 
                 // create a data object with the data sets
@@ -235,116 +150,72 @@ class MainActivity : AppCompatActivity() {
                 // set data
                 binding.lineChart.data = data
 
-
+                // set formatter to x Axis
                 val formatter: ValueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float, axis: AxisBase): String {
+                    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
                         return xVal[value.toInt()]
                     }
-                }
 
+                }
                 val xAxis: XAxis = binding.lineChart.xAxis
                 xAxis.granularity = 1f // minimum axis-step (interval) is 1
 
                 xAxis.valueFormatter = formatter
 
             }
-        }else{
-            binding.lineChartCardView.visibility=View.GONE
+        } else {
+            binding.lineChartCardView.visibility = View.GONE
         }
 
     }
 
-    // show jobs in custom layout
-    private fun showJobs(analytics: Analytics) {
+
+    // to show the pie chart
+    private fun showPieCharts(analytics: Analytics) {
         val viewGroup =
             (findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
-        binding.jobsLinearLayout.removeAllViews()
 
-        if (analytics.job != null) {
-            binding.jobsCardView.visibility=View.VISIBLE
+        // remove the old added views from the layout when refreshing
+        binding.pieChartsLineaLayout.removeAllViews()
 
-            binding.jobsTitleTextView.text = analytics.job.jobTitle
-            binding.jobsDescriptionTextView.text = analytics.job.jobDescription
-
-            for (items in analytics.job.jobItemsList) {
-                val bin = DataBindingUtil.inflate<JobItemBinding>(
+        // check if there are no pie charts , hide the cardView
+        if (analytics.pieCharts != null) {
+            binding.pieChartCardView.visibility = View.VISIBLE
+            for (items in analytics.pieCharts) {
+                // inflate the pie item
+                val bin = DataBindingUtil.inflate<PieChartItemBinding>(
                     layoutInflater,
-                    R.layout.job_item,
+                    R.layout.pie_chart_item,
                     viewGroup,
                     false
                 )
-                bin.titleTextView.text = items.jobItemTitle
-                bin.descriptionTextView.text = items.jobItemDescription
-
-                if (items.jobItemTotal != null) {
-                    val total = getString(R.string.total) + items.jobItemTotal
-                    bin.totalTextView.text = total
-                }
-                bin.growthTextView.text = items.jobItemGrowth.toString()
+                bin.pieChartTitleTextView.text = items.pieChartTitle
+                bin.pieChartDescriptionTextView.text = items.pieChartDescription
+                setPieChartData(items.pieChartItemsList, bin.pieChart)
 
                 val checkParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
-                binding.jobsLinearLayout.addView(bin.root, checkParams)
-
+                binding.pieChartsLineaLayout.addView(bin.root, checkParams)
             }
-        }else{
-            binding.jobsCardView.visibility=View.GONE
-        }
 
-    }
-
-    private fun showServices(analytics: Analytics) {
-        val viewGroup =
-            (findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
-        binding.servicesLinearLayout.removeAllViews()
-
-        if (analytics.service != null) {
-            binding.servicesCardView.visibility=View.VISIBLE
-
-            binding.servicesTitleTextView.text = analytics.service.serviceTitle
-            binding.servicesDescriptionTextView.text = analytics.service.serviceDescription
-
-            for (items in analytics.service.serviceItemsList) {
-                val bin = DataBindingUtil.inflate<JobItemBinding>(
-                    layoutInflater,
-                    R.layout.job_item,
-                    viewGroup,
-                    false
-                )
-                bin.titleTextView.text = items.serviceItemTitle
-                bin.descriptionTextView.text = items.serviceItemDescription
-
-                if (items.serviceItemTotal != null) {
-                    val total = getString(R.string.total) + items.serviceItemTotal
-                    bin.totalTextView.text = total
-                }
-                bin.growthTextView.text = items.serviceItemGrowth.toString()
-
-                val checkParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                binding.servicesLinearLayout.addView(bin.root, checkParams)
-
-
-            }
-        }else{
-            binding.servicesCardView.visibility=View.GONE
+        } else {
+            binding.pieChartCardView.visibility = View.GONE
         }
 
     }
 
 
+    // show the rating chart
     private fun rating(analytics: Analytics) {
         if (analytics.rating != null) {
-            binding.ratingCardView.visibility=View.VISIBLE
+            binding.ratingCardView.visibility = View.VISIBLE
 
             val values = ArrayList<BarEntry>()
             binding.ratingTitleTextView.text = analytics.rating.ratingTitle
             binding.ratingDescriptionTextView.text = analytics.rating.ratingDescription
-
+            // add the rating items to the array list
             values.add(
                 BarEntry(1f, analytics.rating.ratingItems.oneStarRating.toFloat())
             )
@@ -383,27 +254,108 @@ class MainActivity : AppCompatActivity() {
                 data.barWidth = 0.9f
                 binding.ratingChart.data = data
 
-
-                val quarters =
-                    arrayOf("1 star", "2 stars", "3 stars", "4 stars", "5 stars")
-
+                // format the x values
+                val stars = arrayOf("1 star", "2 stars", "3 stars", "4 stars", "5 stars")
                 val formatter: ValueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float, axis: AxisBase?): String? {
-                        return quarters[value.toInt()]
+                    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                        return stars[value.toInt()-1]
                     }
                 }
-
                 val xAxis: XAxis = binding.ratingChart.xAxis
                 xAxis.granularity = 1f // minimum axis-step (interval) is 1
 
                 xAxis.valueFormatter = formatter
             }
-        }else{
-            binding.ratingCardView.visibility=View.GONE
+        } else {
+            binding.ratingCardView.visibility = View.GONE
         }
 
 
     }
 
+
+    // show jobs in custom layout
+    private fun showJobs(analytics: Analytics) {
+        val viewGroup =
+            (findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
+        binding.jobsLinearLayout.removeAllViews()
+
+        // check if the job not null
+        if (analytics.job != null) {
+            binding.jobsCardView.visibility = View.VISIBLE
+
+            binding.jobsTitleTextView.text = analytics.job.jobTitle
+            binding.jobsDescriptionTextView.text = analytics.job.jobDescription
+
+            // render all the jobs in the response and add it to the card view
+            for (items in analytics.job.jobItemsList) {
+                val bin = DataBindingUtil.inflate<JobItemBinding>(
+                    layoutInflater,
+                    R.layout.job_item,
+                    viewGroup,
+                    false
+                )
+                bin.titleTextView.text = items.jobItemTitle
+                bin.descriptionTextView.text = items.jobItemDescription
+
+                if (items.jobItemTotal != null) {
+                    val total = getString(R.string.total) + items.jobItemTotal
+                    bin.totalTextView.text = total
+                }
+                bin.growthTextView.text = items.jobItemGrowth.toString()
+
+                val checkParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                binding.jobsLinearLayout.addView(bin.root, checkParams)
+
+            }
+        } else {
+            binding.jobsCardView.visibility = View.GONE
+        }
+
+    }
+
+    // show services cards
+    private fun showServices(analytics: Analytics) {
+        val viewGroup =
+            (findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
+        binding.servicesLinearLayout.removeAllViews()
+
+        // check if the services not null and make it visble
+        if (analytics.service != null) {
+            binding.servicesCardView.visibility = View.VISIBLE
+
+            binding.servicesTitleTextView.text = analytics.service.serviceTitle
+            binding.servicesDescriptionTextView.text = analytics.service.serviceDescription
+            // render all the services in the response and add it to the main card view
+            for (items in analytics.service.serviceItemsList) {
+                val bin = DataBindingUtil.inflate<JobItemBinding>(
+                    layoutInflater,
+                    R.layout.job_item,
+                    viewGroup,
+                    false
+                )
+                bin.titleTextView.text = items.serviceItemTitle
+                bin.descriptionTextView.text = items.serviceItemDescription
+                if (items.serviceItemTotal != null) {
+                    val total = getString(R.string.total) + items.serviceItemTotal
+                    bin.totalTextView.text = total
+                }
+                bin.growthTextView.text = items.serviceItemGrowth.toString()
+                val checkParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                binding.servicesLinearLayout.addView(bin.root, checkParams)
+
+
+            }
+        } else {
+            binding.servicesCardView.visibility = View.GONE
+        }
+
+    }
 
 }

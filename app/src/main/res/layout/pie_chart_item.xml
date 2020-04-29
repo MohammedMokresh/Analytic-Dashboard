@@ -7,6 +7,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:layout_marginTop="@dimen/_15sdp"
             android:id="@+id/pie_chart_title_TextView"
             style="@style/text_bold_16_black"
             android:layout_width="wrap_content"
@@ -22,7 +23,13 @@
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pie_chart"
             android:layout_width="match_parent"
+            android:layout_marginBottom="@dimen/_15sdp"
             android:layout_height="@dimen/_350sdp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/divider"/>
 
     </LinearLayout>
 </layout>

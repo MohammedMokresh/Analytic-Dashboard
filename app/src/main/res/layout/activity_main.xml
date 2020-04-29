@@ -4,9 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="ContentDescription">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <data>
+        <variable
+            name="viewModel"
+            type="com.mokresh.analyticsdashboard.ui.AnalyticsViewModel"/>
+    </data>
+
+
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -37,7 +41,7 @@
 
                             <TextView
                                 android:id="@+id/jobs_title_TextView"
-                                style="@style/text_bold_16_black"
+                                style="@style/text_bold_20_black"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="@dimen/_10sdp"
@@ -79,7 +83,7 @@
 
                             <TextView
                                 android:id="@+id/line_chart_title_TextView"
-                                style="@style/text_bold_16_black"
+                                style="@style/text_bold_20_black"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
 
@@ -136,7 +140,7 @@
 
                             <TextView
                                 android:id="@+id/services_title_TextView"
-                                style="@style/text_bold_16_black"
+                                style="@style/text_bold_20_black"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="@dimen/_10sdp"
@@ -180,7 +184,7 @@
 
                             <TextView
                                 android:id="@+id/rating_title_TextView"
-                                style="@style/text_bold_16_black"
+                                style="@style/text_bold_20_black"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
 
@@ -220,8 +224,12 @@
                 app:menu="@menu/bottom_navigation_menu" />
 
 
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:mutableVisibility="@{viewModel.getLoadingVisibility()}"
+                android:layout_centerInParent="true"
+                />
+
         </RelativeLayout>
-
-
-    </RelativeLayout>
 </layout>
