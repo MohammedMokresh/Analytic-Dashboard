@@ -96,6 +96,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.pieChartsLineaLayout.removeAllViews()
         if (analytics.pieCharts != null) {
+            binding.pieChartCardView.visibility=View.VISIBLE
+
             for (items in analytics.pieCharts) {
                 val bin = DataBindingUtil.inflate<PieChartItemBinding>(
                     layoutInflater,
@@ -117,6 +119,8 @@ class MainActivity : AppCompatActivity() {
 
             }
 
+        }else{
+            binding.pieChartCardView.visibility=View.GONE
         }
 
     }
@@ -160,6 +164,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun lineChart(analytics: Analytics) {
         if (analytics.lineCharts != null) {
+            binding.lineChartCardView.visibility=View.VISIBLE
+
             val xVal: ArrayList<String> = ArrayList<String>()
             val yValJobs = ArrayList<Entry>()
             val yValServices = ArrayList<Entry>()
@@ -242,6 +248,8 @@ class MainActivity : AppCompatActivity() {
                 xAxis.valueFormatter = formatter
 
             }
+        }else{
+            binding.lineChartCardView.visibility=View.GONE
         }
 
     }
@@ -253,6 +261,8 @@ class MainActivity : AppCompatActivity() {
         binding.jobsLinearLayout.removeAllViews()
 
         if (analytics.job != null) {
+            binding.jobsCardView.visibility=View.VISIBLE
+
             binding.jobsTitleTextView.text = analytics.job.jobTitle
             binding.jobsDescriptionTextView.text = analytics.job.jobDescription
 
@@ -279,6 +289,8 @@ class MainActivity : AppCompatActivity() {
                 binding.jobsLinearLayout.addView(bin.root, checkParams)
 
             }
+        }else{
+            binding.jobsCardView.visibility=View.GONE
         }
 
     }
@@ -289,6 +301,8 @@ class MainActivity : AppCompatActivity() {
         binding.servicesLinearLayout.removeAllViews()
 
         if (analytics.service != null) {
+            binding.servicesCardView.visibility=View.VISIBLE
+
             binding.servicesTitleTextView.text = analytics.service.serviceTitle
             binding.servicesDescriptionTextView.text = analytics.service.serviceDescription
 
@@ -316,6 +330,8 @@ class MainActivity : AppCompatActivity() {
 
 
             }
+        }else{
+            binding.servicesCardView.visibility=View.GONE
         }
 
     }
@@ -323,6 +339,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun rating(analytics: Analytics) {
         if (analytics.rating != null) {
+            binding.ratingCardView.visibility=View.VISIBLE
+
             val values = ArrayList<BarEntry>()
             binding.ratingTitleTextView.text = analytics.rating.ratingTitle
             binding.ratingDescriptionTextView.text = analytics.rating.ratingDescription
@@ -355,7 +373,7 @@ class MainActivity : AppCompatActivity() {
                 binding.ratingChart.data.notifyDataChanged()
                 binding.ratingChart.notifyDataSetChanged()
             } else {
-                set1 = BarDataSet(values, "The year 2017")
+                set1 = BarDataSet(values, "Rating")
                 set1.setDrawIcons(false)
 
                 val dataSets = ArrayList<IBarDataSet>()
@@ -380,6 +398,8 @@ class MainActivity : AppCompatActivity() {
 
                 xAxis.valueFormatter = formatter
             }
+        }else{
+            binding.ratingCardView.visibility=View.GONE
         }
 
 
