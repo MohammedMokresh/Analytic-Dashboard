@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
             lineChart(it)
 
             showPieCharts(it)
+            showServices(it)
         })
 
 
@@ -237,5 +238,38 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+    private fun showServices(analytics: Analytics) {
+        val viewGroup =
+            (findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
+
+        binding.servicesTitleTextView.text = analytics.service.serviceTitle
+        binding.servicesDescriptionTextView.text = analytics.service.serviceDescription
+
+        for (items in analytics.service.serviceItemsList) {
+            val bin = DataBindingUtil.inflate<JobItemBinding>(
+                layoutInflater,
+                R.layout.job_item,
+                viewGroup,
+                false
+            )
+            bin.titleTextView.text = items.serviceItemTitle
+            bin.descriptionTextView.text = items.serviceItemDescription
+
+            if (items.serviceItemTotal != null) {
+                bin.totalTextView.text = getString(R.string.total) + items.serviceItemTotal
+            }
+            bin.growthTextView.text = items.serviceItemGrowth.toString()
+
+            val checkParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            binding.servicesLinearLayout.addView(bin.root, checkParams)
+
+
+        }
+    }
+
 
 }
